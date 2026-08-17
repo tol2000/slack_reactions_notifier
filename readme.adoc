@@ -21,6 +21,7 @@ The application is configured via environment variables or a `.env` file located
 | SLACK_APP_TOKEN | Your Slack App-Level Token (`xapp-...`) | Required
 | MY_SLACK_ID | Your Slack Member ID (e.g., `U12345678`) | Required
 | LOGGING_LEVEL | Logging level (DEBUG, INFO, WARNING, etc.) | INFO
+| LOGGING_LEVEL_FOR_THIRD_PARTY_LIBS | Logging level for third-party libraries (slack_bolt, etc.) | WARNING
 |===
 
 === Configuration Methods
@@ -43,6 +44,7 @@ docker run -d \
   -e SLACK_APP_TOKEN="xapp-your-app-token" \
   -e MY_SLACK_ID="U12345678" \
   -e LOGGING_LEVEL="INFO" \
+  -e LOGGING_LEVEL_FOR_THIRD_PARTY_LIBS="WARNING" \
   slack-reactions-notifier
 ----
 

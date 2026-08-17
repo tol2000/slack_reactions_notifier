@@ -11,6 +11,11 @@ from app.config import settings
 def setup_logging():
     """Configure logging for the application."""
     log_level = settings.LOGGING_LEVEL.upper()
+    third_party_level = settings.LOGGING_LEVEL_FOR_THIRD_PARTY_LIBS.upper()
+
+    # Configure third-party loggers
+    for logger_name in ["slack_bolt", "slack_sdk", "urllib3"]:
+        logging.getLogger(logger_name).setLevel(third_party_level)
     
     script_dir = Path(__file__).resolve().parent
     logs_dir = script_dir / "logs"
