@@ -55,9 +55,9 @@ app = App(token=settings.SLACK_BOT_TOKEN, logger=app_logger)
 
 
 @app.event("reaction_added")
-def handle_reaction_events(event, say, l_logger=app_logger):
+def handle_reaction_events(event, say):
     """Handle reaction_added events from Slack."""
-    l_logger.debug(f"Reaction event captured: {event}")
+    app_logger.debug(f"Reaction event captured: {event}")
 
     user_who_reacted = event["user"]
     emoji_name = event["reaction"]
@@ -65,7 +65,7 @@ def handle_reaction_events(event, say, l_logger=app_logger):
 
     # Debugging/Testing: Self-reaction
     if user_who_reacted == item_user:
-        l_logger.debug("Self-reaction detected. Sending debug notification...")
+        app_logger.debug("Self-reaction detected. Sending debug notification...")
         say(
             text=f"🧪 Debug test: you added a :{emoji_name}: reaction to your own message!",
             channel=user_who_reacted
@@ -74,26 +74,26 @@ def handle_reaction_events(event, say, l_logger=app_logger):
 
     # Notification for the target user (configured via settings)
     if item_user == settings.MY_SLACK_ID:
-        l_logger.debug(f"User {user_who_reacted} reacted to your message. Sending notification...")
+        app_logger.debug(f"User {user_who_reacted} reacted to your message. Sending notification...")
         say(
             text=f"🔔 User <@{user_who_reacted}> added a :{emoji_name}: reaction to your message!",
             channel=settings.MY_SLACK_ID
         )
 
 
-def main(l_logger=app_logger):
+def main():
     """Main entry point for the application."""
-    l_logger.info("Initializing Socket Mode Handler and starting the app...")
+    app_logger.info("Initializing Socket Mode Handler and starting the app...")
     try:
         handler = SocketModeHandler(app, settings.SLACK_APP_TOKEN)
         handler.start()
     except KeyboardInterrupt:
-        l_logger.info("Application interrupted by user.")
+        app_logger.info("Application interrupted by user.")
     except Exception as e:
-        l_logger.critical(f"Unexpected error occurred: {e}", exc_info=True)
+        app_logger.critical(f"Unexpected error occurred: {e}", exc_info=True)
         sys.exit(1)
     finally:
-        l_logger.info("Slack Reaction Notifier service stopped.")
+        app_logger.info("Slack Reaction Notifier service stopped.")
 
 
 if __name__ == "__main__":
