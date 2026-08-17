@@ -11,7 +11,7 @@ A simple Slack bot that notifies you when someone adds a reaction to your messag
 - Dockerized setup.
 
 == Configuration
-The application is configured via environment variables or a `.env` file located in the `app/` directory (or the project root).
+The application is configured via environment variables or a `.env` file located in the project root (parent of the `app/` directory).
 
 [cols="1,2,1"]
 |===

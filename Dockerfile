@@ -20,7 +20,7 @@ COPY --from=uv_build /app/requirements.txt .
 RUN python -m pip install --no-cache-dir -r requirements.txt
 
 COPY app/ ./app/
-COPY .env ./app/
+COPY .env ./
 COPY prestart.sh /app/prestart.sh
 RUN chmod +x /app/prestart.sh
 
