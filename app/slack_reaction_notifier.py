@@ -14,7 +14,7 @@ def setup_logging() -> None:
     third_party_level = settings.LOGGING_LEVEL_FOR_THIRD_PARTY_LIBS.upper()
 
     # Configure third-party loggers
-    for logger_name in ["slack_bolt", "slack_sdk", "urllib3"]:
+    for logger_name in ["slack_bolt", "slack_sdk", "urllib3", "websocket"]:
         logging.getLogger(logger_name).setLevel(third_party_level)
     
     script_dir = Path(__file__).resolve().parent
@@ -51,7 +51,7 @@ def setup_logging() -> None:
 # Initialize logging and Slack app
 setup_logging()
 app_logger = logging.getLogger("SlackNotifier.main")
-app = App(token=settings.SLACK_BOT_TOKEN, logger=app_logger)
+app = App(token=settings.SLACK_BOT_TOKEN)
 
 
 @app.event("reaction_added")
