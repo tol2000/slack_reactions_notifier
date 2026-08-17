@@ -10,7 +10,7 @@ from app.config import settings
 
 def setup_logging():
     """Configure logging for the application."""
-    log_level = settings.LOGGING_LEVEL
+    log_level = settings.LOGGING_LEVEL.upper()
     
     script_dir = Path(__file__).resolve().parent
     logs_dir = script_dir / "logs"
