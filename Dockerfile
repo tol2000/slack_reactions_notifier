@@ -1,6 +1,6 @@
 FROM ghcr.io/astral-sh/uv:alpine AS uv_build
 WORKDIR /app
-COPY pyproject.toml uv.lock ./
+COPY pyproject.toml ./
 RUN uv export --no-hashes --no-emit-project --format requirements-txt > requirements.txt
 
 FROM python:3.13-slim-bookworm
@@ -20,12 +20,13 @@ COPY --from=uv_build /app/requirements.txt .
 RUN python -m pip install --no-cache-dir -r requirements.txt
 
 COPY app/ ./app/
+COPY .env ./app/
 COPY prestart.sh /app/prestart.sh
 RUN chmod +x /app/prestart.sh
 
 # Use uvicorn directly. FastMCP by default runs on 8000 when using HTTP transport.
 # If prestart.sh is needed, we can call it in CMD or via an ENTRYPOINT.
 # We use exec to ensure signals are passed correctly to the python process.
-CMD ["/bin/bash", "-c", "/app/prestart.sh && exec python -m app.server"]
+CMD ["/bin/bash", "-c", "/app/prestart.sh && exec python -m app.slack_reaction_notifier"]
 
 EXPOSE 8000
