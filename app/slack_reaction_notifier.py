@@ -8,7 +8,7 @@ from slack_bolt.adapter.socket_mode import SocketModeHandler
 from app.config import settings
 
 
-def setup_logging():
+def setup_logging() -> None:
     """Configure logging for the application."""
     log_level = settings.LOGGING_LEVEL.upper()
     third_party_level = settings.LOGGING_LEVEL_FOR_THIRD_PARTY_LIBS.upper()
@@ -38,27 +38,26 @@ def setup_logging():
     file_handler.setLevel(log_level)
     file_handler.setFormatter(fmt_file)
 
-    # Root Logger Setup
-    l_logger = logging.getLogger("SlackNotifier")
-    l_logger.setLevel(log_level)
+    # App-level logger setup (serves as a base for children)
+    base_logger = logging.getLogger("SlackNotifier")
+    base_logger.setLevel(log_level)
     
     # Avoid duplicate handlers if setup_logging is called multiple times
-    if not l_logger.handlers:
-        l_logger.addHandler(screen_handler)
-        l_logger.addHandler(file_handler)
-    
-    return l_logger
+    if not base_logger.handlers:
+        base_logger.addHandler(screen_handler)
+        base_logger.addHandler(file_handler)
 
 
-# Initialize logger and Slack app
-logger = setup_logging()
-app = App(token=settings.SLACK_BOT_TOKEN, logger=logger)
+# Initialize logging and Slack app
+setup_logging()
+app_logger = logging.getLogger("SlackNotifier.main")
+app = App(token=settings.SLACK_BOT_TOKEN, logger=app_logger)
 
 
 @app.event("reaction_added")
-def handle_reaction_events(event, say, logger):
+def handle_reaction_events(event, say, l_logger=app_logger):
     """Handle reaction_added events from Slack."""
-    logger.debug(f"Reaction event captured: {event}")
+    l_logger.debug(f"Reaction event captured: {event}")
 
     user_who_reacted = event["user"]
     emoji_name = event["reaction"]
@@ -66,7 +65,7 @@ def handle_reaction_events(event, say, logger):
 
     # Debugging/Testing: Self-reaction
     if user_who_reacted == item_user:
-        logger.debug("Self-reaction detected. Sending debug notification...")
+        l_logger.debug("Self-reaction detected. Sending debug notification...")
         say(
             text=f"🧪 Debug test: you added a :{emoji_name}: reaction to your own message!",
             channel=user_who_reacted
@@ -75,26 +74,26 @@ def handle_reaction_events(event, say, logger):
 
     # Notification for the target user (configured via settings)
     if item_user == settings.MY_SLACK_ID:
-        logger.debug(f"User {user_who_reacted} reacted to your message. Sending notification...")
+        l_logger.debug(f"User {user_who_reacted} reacted to your message. Sending notification...")
         say(
             text=f"🔔 User <@{user_who_reacted}> added a :{emoji_name}: reaction to your message!",
             channel=settings.MY_SLACK_ID
         )
 
 
-def main():
+def main(l_logger=app_logger):
     """Main entry point for the application."""
-    logger.info("Initializing Socket Mode Handler and starting the app...")
+    l_logger.info("Initializing Socket Mode Handler and starting the app...")
     try:
         handler = SocketModeHandler(app, settings.SLACK_APP_TOKEN)
         handler.start()
     except KeyboardInterrupt:
-        logger.info("Application interrupted by user.")
+        l_logger.info("Application interrupted by user.")
     except Exception as e:
-        logger.critical(f"Unexpected error occurred: {e}", exc_info=True)
+        l_logger.critical(f"Unexpected error occurred: {e}", exc_info=True)
         sys.exit(1)
     finally:
-        logger.info("Slack Reaction Notifier service stopped.")
+        l_logger.info("Slack Reaction Notifier service stopped.")
 
 
 if __name__ == "__main__":
