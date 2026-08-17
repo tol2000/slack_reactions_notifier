@@ -48,6 +48,47 @@ docker run -d \
 
 == Installation
 
+=== Slack configuration Steps
+
+Follow this hierarchical guide to configure your Slack workspace, obtain the required environment variables (`SLACK_APP_TOKEN`, `SLACK_BOT_TOKEN`, `MY_SLACK_ID`), and run the script.
+
+. *Creating the App & Obtaining `SLACK_APP_TOKEN`*
+  .. Open the Slack Application Management console directly via link:https://api.slack.com/apps[api.slack.com/apps].
+  .. Click the *Create New App* button in the top right corner.
+  .. Select the *From scratch* option in the pop-up dialog.
+  .. Provide your configuration details:
+    ... *App Name*: Enter a descriptive name (e.g., `My Reaction Notifier`).
+    ... *Development Slack Workspace*: Select your company's workspace from the dropdown list.
+  .. Click the *Create App* button to finalize.
+  .. In the left navigation menu under *Settings*, select *Socket Mode*.
+  .. Toggle the *Enable Socket Mode* switch to the *ON* position.
+  .. In the modal window that appears, enter any token name (e.g., `SocketToken`) and click *Generate*.
+  .. Copy the generated string starting with `xapp-...`. Save this as your *`SLACK_APP_TOKEN`*.
+
+. *Configuring Permissions & Obtaining `SLACK_BOT_TOKEN`*
+  .. In the left navigation menu under *Features*, select *OAuth & Permissions*.
+  .. Scroll down to the *Scopes* section, specifically under *Bot Token Scopes*.
+  .. Click the *Add an OAuth Scope* button and assign the following permissions:
+    ... `reactions:read` — allows the app to detect emoji reaction events.
+    ... `chat:write` — allows the app to send direct messages to your account.
+    ... `channels:history` — allows the app to monitor reaction events within public channels.
+  .. In the left navigation menu under *Features*, select *Event Subscriptions*.
+  .. Toggle the *Enable Events* switch to the *ON* position.
+  .. Scroll down to the *Subscribe to bot events* subsection and click *Add Bot User Event*.
+  .. Select the `reaction_added` event from the list and click *Save Changes* at the bottom.
+  .. In the left navigation menu under *Settings*, select *Install App*.
+  .. Click the green *Install to Workspace* button and authorize the application.
+  .. Copy the generated *Bot User OAuth Token* starting with `xoxb-...`. Save this as your *`SLACK_BOT_TOKEN`*.
+
+. *Obtaining Your Personal `MY_SLACK_ID`*
+  .. Open your official Slack desktop or mobile application.
+  .. Click on your *Profile Picture / Avatar* in the application interface.
+  .. Select the *Profile* option from the dropdown menu to open your profile sidebar.
+  .. Click the *More (...)* button (three horizontal or vertical dots) inside the profile view.
+  .. Click the *Copy member ID* option.
+  .. The string starting with `U...` (e.g., `U1234567890`) is now copied to your clipboard. Save this as your *`MY_SLACK_ID`*.
+
+
 === Using Docker
 1. Build the image:
 [source,bash]
