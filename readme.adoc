@@ -11,7 +11,12 @@ A simple Slack bot that notifies you when someone adds a reaction to your messag
 - Dockerized setup.
 
 == Configuration
-The application is configured via environment variables or a `.env` file located in the project root (parent of the `app/` directory).
+
+=== Environment variables (.env file)
+
+The application is configured via environment variables or a `.env` file
+located in the project root (parent of the `app/` directory).
+So, initially you may copy it from .env.example
 
 [cols="1,2,1"]
 |===
@@ -103,12 +108,8 @@ without exposing them to third parties.
 
 [source,bash]
 ----
-# Set your mirror app credentials in the terminal
-export SLACK_CLIENT_ID="your_client_id_here"
-export SLACK_CLIENT_SECRET="your_client_secret_here"
-
-# Launch the ephemeral auth server via shell script
-./run_auth.sh
+# Launch the ephemeral auth server via shell script with corresponding parameters in the environment
+SLACK_CLIENT_ID="your_client_id_here" SLACK_CLIENT_SECRET="your_client_secret_here" ./run_auth.sh
 ----
 
 Your browser will prompt you to authorize your mirror app. Click *Allow*.
@@ -122,37 +123,43 @@ Copy them into your production `.env` file and close the browser.
   ** Open your desktop Slack application and press `Ctrl + R` (Windows) or `Cmd + R` (Mac)
      to unblock the app's messaging interface.
 . **Locate the App**:
-  ** In the Slack left sidebar under *Apps*, find `my-reactions-notifier` and open its direct chat.
+  ** In the Slack left sidebar under *Apps*, find `slack-reactions-notifier` and open its direct chat.
      Send any message to verify text input is fully unlocked.
 . **Test the Handler**:
   ** Run your main notifier script. Post a message inside the bot's direct chat
-     (or a public channel where you invited it via `/invite @my-reactions-notifier`)
+     (or a public channel where you invited it via `/invite @slack-reactions-notifier`)
      and add an emoji reaction.
      The handler will log the event to the screen and `logs/` directory,
      then send a notification to your DM.
 
 === Using Docker
-1. Build the image:
+
+==== Build the image
+
 [source,bash]
 ----
 ./docker_build.sh
 ----
 
-2. Run the container:
+==== Run the container
+
 [source,bash]
 ----
 ./docker_run.sh
 ----
 
 === Local Development
-1. Install dependencies:
+
+==== Install dependencies
+
 [source,bash]
 ----
 pip install -r requirements.txt
 ----
 (Note: It is recommended to use `uv` or `pip` with `pyproject.toml`)
 
-2. Run the application:
+==== Run the application
+
 [source,bash]
 ----
 python -m app.slack_reaction_notifier
