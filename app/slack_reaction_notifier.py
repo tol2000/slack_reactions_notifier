@@ -75,24 +75,13 @@ def handle_reaction_events(event):
 
     user_who_reacted = event["user"]
     emoji_name = event["reaction"]
-    item_user = event.get("item_user")
 
-    # Debugging/Testing: Self-reaction
-    if user_who_reacted == item_user:
-        app_logger.debug("Self-reaction detected. Sending debug notification...")
-        send_bot_notification(
-            channel=user_who_reacted,
-            text=f"🧪 Debug test: you added a :{emoji_name}: reaction to your own message!"
-        )
-        return
-
-    # Notification for the target user (configured via settings)
-    if item_user == settings.MY_SLACK_ID:
-        app_logger.debug(f"User {user_who_reacted} reacted to your message. Sending notification...")
-        send_bot_notification(
-            channel=settings.MY_SLACK_ID,
-            text=f"🔔 User <@{user_who_reacted}> added a :{emoji_name}: reaction to your message!"
-        )
+    # Generic notification for all captured reactions
+    app_logger.debug(f"Reaction by {user_who_reacted} detected. Sending notification...")
+    send_bot_notification(
+        channel=settings.MY_SLACK_ID,
+        text=f"📢 User <@{user_who_reacted}> added a :{emoji_name}: reaction to a message!"
+    )
 
 
 def main():

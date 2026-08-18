@@ -1,6 +1,6 @@
 = Slack Reactions Notifier
 
-A simple Slack bot that notifies you when someone adds a reaction to your message.
+A simple Slack bot that notifies you when someone adds a reaction to a message in your channels.
 
 This application uses a hybrid architecture:
 it monitors events and reads channels using your personal SLACK_USER_TOKEN (acting with your personal access level),
@@ -8,8 +8,7 @@ but sends direct notifications back to you using the SLACK_BOT_TOKEN to avoid sc
 
 == Features
 - Captures `reaction_added` events.
-- Notifies you via DM when someone reacts to your messages.
-- Self-reaction debug mode.
+- Notifies you via DM when emoji reactions are detected in your channels.
 - Configurable logging levels.
 - Pydantic-based configuration.
 - Dockerized setup.
