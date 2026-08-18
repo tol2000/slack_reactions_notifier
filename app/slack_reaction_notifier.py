@@ -97,7 +97,7 @@ def handle_reaction_events(event):
         channel=settings.MY_SLACK_ID,
         text=(
             f"📢 User <@{user_who_reacted}> added a :{emoji_name}: reaction to a message "
-            f"🔗 Link: {permalink}"
+            f"🔗 {permalink}"
         )
     )
 
