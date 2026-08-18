@@ -36,7 +36,7 @@ class OAuthCallbackHandler(BaseHTTPRequestHandler):
         auth_code = query_params["code"][0]
 
         # Exchange temporary code for secure tokens via official Slack API
-        token_url = "https://slack.com"
+        token_url = "https://slack.com/api/oauth.v2.access"
         data = urllib.parse.urlencode({
             "client_id": CLIENT_ID,
             "client_secret": CLIENT_SECRET,
@@ -118,7 +118,7 @@ class OAuthCallbackHandler(BaseHTTPRequestHandler):
 def run_local_server():
     server = HTTPServer(("127.0.0.1", PORT), OAuthCallbackHandler)
     scopes = "reactions:read,channels:history,groups:history"
-    slack_auth_url = f"https://slack.com{CLIENT_ID}&user_scope={scopes}&redirect_uri={REDIRECT_URI}"
+    slack_auth_url = f"https://slack.com/oauth/v2/authorize?client_id={CLIENT_ID}&user_scope={scopes}&redirect_uri={REDIRECT_URI}"
 
     print(f"Starting ephemeral local authentication server on port {PORT}...")
     print(f"Opening your browser for Slack authentication...")

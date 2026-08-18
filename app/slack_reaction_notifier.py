@@ -51,7 +51,7 @@ def setup_logging() -> None:
 # Initialize logging and Slack app
 setup_logging()
 app_logger = logging.getLogger("SlackNotifier.main")
-app = App(token=settings.SLACK_BOT_TOKEN)
+app = App(token=settings.SLACK_USER_TOKEN)
 
 
 @app.event("reaction_added")

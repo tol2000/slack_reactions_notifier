@@ -4,7 +4,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    SLACK_BOT_TOKEN: str = ""
+    SLACK_USER_TOKEN: str = ""
     SLACK_APP_TOKEN: str = ""
     MY_SLACK_ID: str = ""
     LOGGING_LEVEL: str = "INFO"
