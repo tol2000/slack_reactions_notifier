@@ -50,61 +50,85 @@ docker run -d \
 
 == Installation
 
-=== Slack Configuration Steps
+=== Slack Setup Guide
 
-Follow this hierarchical guide to configure your Slack workspace, enable user interaction, obtain the required environment variables (`SLACK_APP_TOKEN`, `SLACK_BOT_TOKEN`, `MY_SLACK_ID`), and successfully test the script.
+This project follows the **"Bring Your Own App" (Mirror App)** pattern.
+To protect your corporate credentials and avoid running a centralized server,
+every user creates their own private mirror application in their Slack workspace.
+This grants the script the exact same access level as your personal Slack account.
 
-. *Creating the App & Obtaining `SLACK_APP_TOKEN`*
-  .. Open the Slack Application Management console directly via link:https://api.slack.com/apps[api.slack.com/apps].
-  .. Click the *Create New App* button in the top right corner.
-  .. Select the *From scratch* option in the pop-up dialog.
-  .. Provide your configuration details:
-    ... *App Name*: Enter a descriptive name (e.g., `slack-reactions-notifier`).
-    ... *Development Slack Workspace*: Select your company's workspace from the dropdown list.
-  .. Click the *Create App* button to finalize.
-  .. In the left navigation menu under *Settings*, select *Socket Mode*.
-  .. Toggle the *Enable Socket Mode* switch to the *ON* position.
-  .. In the modal window that appears, enter any token name (e.g., `SocketToken`) and click *Generate*.
-  .. Copy the generated string starting with `xapp-...`. Save this as your *`SLACK_APP_TOKEN`*.
+==== Step 1: Create Your Mirror App & Get `SLACK_APP_TOKEN`
 
-. *Configuring Permissions & Messages Tab*
-  .. In the left navigation menu under *Features*, select *OAuth & Permissions*.
-  .. Scroll down to the *Scopes* section, specifically under *Bot Token Scopes*.
-  .. Click the *Add an OAuth Scope* button and assign the following permissions:
-    ... `reactions:read` — allows the app to detect emoji reaction events.
-    ... `chat:write` — allows the app to send direct messages to your account.
-    ... `channels:history` — allows the app to monitor channel history.
-  .. In the left navigation menu under *Features*, select *Event Subscriptions*.
-  .. Toggle the *Enable Events* switch to the *ON* position.
-  .. Scroll down to the *Subscribe to bot events* subsection, click *Add Bot User Event*, and select `reaction_added` from the list.
-  .. Click the *Save Changes* button at the bottom of the page (ensure the button is clicked and settings are saved).
-  .. In the left navigation menu under *Features*, select *App Home*.
-  .. Scroll down to the *Show Tabs* section, locate the *Messages Tab*, and toggle it *ON*.
-  .. Check the box for *"Allow users to send Slash commands and messages from the messages tab"*.
+. Go to link:https://api.slack.com/apps[api.slack.com/apps] and click *Create New App* -> *Blank app*.
+. Name it (e.g., `my-reactions-notifier`) and select your development workspace.
+. In the left menu, go to *Settings* -> *Socket Mode* and toggle *Enable Socket Mode* to *ON*.
+. In the modal, name the token (e.g., `SocketToken`), click *Generate*, and copy the string starting with `xapp-...`.
+  * Save this value as *`SLACK_APP_TOKEN`* in *.env*.
 
-. *Installing the App & Obtaining `SLACK_BOT_TOKEN`*
-  .. In the left navigation menu under *Settings*, select *Install App*.
-  .. Click the green *Install to Workspace* button and authorize the application permissions.
-  .. Copy the generated *Bot User OAuth Token* starting with `xoxb-...`. Save this as your *`SLACK_BOT_TOKEN`*.
+==== Step 2: Configure Scopes & Messages Tab
 
-. *Obtaining Your Personal `MY_SLACK_ID`*
-  .. Open your official Slack desktop or mobile application.
-  .. Click on your *Profile Picture / Avatar* in the application interface.
-  .. Select the *Profile* option from the dropdown menu to open your profile sidebar.
-  .. Click the *More (...)* button (three horizontal or vertical dots) inside the profile view.
-  .. Click the *Copy member ID* option.
-  .. The string starting with `U...` (e.g., `U1234567890`) is now copied to your clipboard. Save this as your *`MY_SLACK_ID`*.
+. Go to *Features* -> *OAuth & Permissions*.
+  * Under *Bot Token Scopes*, add:
+    ** `reactions:read` — to detect emoji reaction events.
+    ** `chat:write` — to send direct messages back to you.
+    ** `channels:history` — to monitor public channel history.
+. Go to *Features* -> *Event Subscriptions*
+  * toggle *Enable Events* to *ON*.
+  * Under *Subscribe to bot events*
+    ** add `reaction_added`
+    ** click *Save Changes* at the bottom.
+. Go to *Features* -> *App Home*.
+  ** Under *Show Tabs*
+     *** turn the *Messages Tab* *ON*
+     *** check *"Allow users to send Slash commands and messages from the messages tab"*.
+. Go to *Features* -> *OAuth & Permissions* -> *Redirect URLs*.
+  ** Add `http://localhost:8000` and click *Save URL*.
 
-. *Client Refresh & Initial Testing (Crucial Steps)*
-  .. *Force Refresh Slack Client*: Open your desktop Slack application and press `Ctrl + R` (Windows) or `Cmd + R` (Mac). This forces Slack to clear its cache and unblock the app's messaging interface.
-  .. *Locate the Bot*: In the left sidebar of your Slack client, scroll down to the *Apps* section, click the `+ Add apps` button if necessary, find your `slack-reactions-notifier` application, and open its direct chat.
-  .. *Verify Direct Messages*: Send a message directly to the bot inside this chat to verify the text input is fully unlocked.
-  .. *Testing the Handler*:
-    ... Run your Python script with the configured environment variables.
-    ... Post a message inside the bot's direct chat or in a public channel where the bot has been invited via `/invite @slack-reactions-notifier`.
-    ... Add an emoji reaction to that message. The handler will capture the event, write formatted logs to the screen and the `logs/` directory, and send a notification back to you.
+==== Step 3: Install the App & Get Credentials
 
+. Go to *Settings* -> *Install App*
+  * click *Install to Workspace*, and authorize permissions.
+  * Copy the *Bot User OAuth Token* starting with `xoxb-...`.
+  * Save this value as *`SLACK_BOT_TOKEN`*.
+. Go to *Settings* -> *Basic Information* -> *App Credentials*.
+  * Copy your `Client ID` and `Client Secret` (click *Show*).
+    You will need them for the interactive login script.
 
+==== Step 4: Run Interactive Authentication
+
+The interactive `auth.py` script starts a temporary local server, opens your browser,
+and fetches your personal user token and unique user ID (`MY_SLACK_ID`)
+without exposing them to third parties.
+
+[source,bash]
+----
+# Set your mirror app credentials in the terminal
+export SLACK_CLIENT_ID="your_client_id_here"
+export SLACK_CLIENT_SECRET="your_client_secret_here"
+
+# Launch the ephemeral auth server
+python auth.py
+----
+
+Your browser will prompt you to authorize your mirror app. Click *Allow*.
+A local success webpage will display your generated `SLACK_USER_TOKEN` (starts with `xoxp-...`)
+and your `MY_SLACK_ID` (starts with `U...`).
+Copy them into your production `.env` file and close the browser.
+
+==== Step 5: Client Refresh & Verification
+
+. **Force Refresh Slack Client**:
+  ** Open your desktop Slack application and press `Ctrl + R` (Windows) or `Cmd + R` (Mac)
+     to unblock the app's messaging interface.
+. **Locate the App**:
+  ** In the Slack left sidebar under *Apps*, find `my-reactions-notifier` and open its direct chat.
+     Send any message to verify text input is fully unlocked.
+. **Test the Handler**:
+  ** Run your main notifier script. Post a message inside the bot's direct chat
+     (or a public channel where you invited it via `/invite @my-reactions-notifier`)
+     and add an emoji reaction.
+     The handler will log the event to the screen and `logs/` directory,
+     then send a notification to your DM.
 
 === Using Docker
 1. Build the image:
