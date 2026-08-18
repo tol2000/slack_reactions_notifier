@@ -85,7 +85,7 @@ This setup grants the containerized application the exact same channel access le
      *** turn the *Messages Tab* *ON*
      *** check *"Allow users to send Slash commands and messages from the messages tab"*.
 . Go to *Features* -> *OAuth & Permissions* -> *Redirect URLs*.
-  ** Add `http://localhost:8000` and click *Save URL*.
+  ** Add `http://localhost:51999` and click *Save URL*.
 
 ==== Step 3: Install the App
 

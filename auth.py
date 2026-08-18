@@ -9,7 +9,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 # Read temporary app credentials from the user's terminal session
 CLIENT_ID = os.environ.get("SLACK_CLIENT_ID", "")
 CLIENT_SECRET = os.environ.get("SLACK_CLIENT_SECRET", "")
-PORT = 8000
+PORT = 51999
 REDIRECT_URI = f"http://localhost:{PORT}"
 
 if not CLIENT_ID or not CLIENT_SECRET:
