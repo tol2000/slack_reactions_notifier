@@ -7,6 +7,7 @@ it monitors events and reads channels using your personal SLACK_USER_TOKEN (acti
 but sends direct notifications back to you using the SLACK_BOT_TOKEN to avoid scope restrictions.
 
 == Features
+
 - Captures `reaction_added` events.
 - Notifies you via DM when emoji reactions are detected in your channels.
 - Configurable logging levels.
