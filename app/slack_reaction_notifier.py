@@ -8,6 +8,8 @@ from slack_sdk import WebClient
 
 from app.config import settings
 
+UNKNOWN_LINK_STR = "Unknown Link"
+
 
 def setup_logging() -> None:
     """Configure logging for the application."""
@@ -75,12 +77,28 @@ def handle_reaction_events(event):
 
     user_who_reacted = event["user"]
     emoji_name = event["reaction"]
+    item = event.get("item", {})
+    channel_id = item.get("channel")
+    message_ts = item.get("ts")
+
+    # Fetch permalink for the message
+    permalink = UNKNOWN_LINK_STR
+    if channel_id and message_ts:
+        try:
+            response = app.client.chat_getPermalink(channel=channel_id, message_ts=message_ts)
+            if response.get("ok"):
+                permalink = response.get("permalink", UNKNOWN_LINK_STR)
+        except Exception as e:
+            app_logger.warning(f"Could not fetch permalink: {e}")
 
     # Generic notification for all captured reactions
     app_logger.debug(f"Reaction by {user_who_reacted} detected. Sending notification...")
     send_bot_notification(
         channel=settings.MY_SLACK_ID,
-        text=f"📢 User <@{user_who_reacted}> added a :{emoji_name}: reaction to a message!"
+        text=(
+            f"📢 User <@{user_who_reacted}> added a :{emoji_name}: reaction to a message "
+            f"🔗 Link: {permalink}"
+        )
     )
 
 
