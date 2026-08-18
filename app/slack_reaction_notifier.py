@@ -51,15 +51,15 @@ def setup_logging() -> None:
 # Initialize logging and Slack app
 setup_logging()
 app_logger = logging.getLogger("SlackNotifier.main")
-app = App(token=settings.SLACK_USER_TOKEN)
+app = App(token=settings.SLACK_BOT_TOKEN)
 
 
 def say_as_user(client, channel: str, text: str):
-    """Send a message into a Slack channel from the perspective of the authorized user."""
+    """Send a message into a Slack channel."""
     client.chat_postMessage(
         channel=channel,
         text=text,
-        as_user=True  # Force Slack to send it as the personal user account
+        as_user=False  # Send as the bot itself
     )
 
 

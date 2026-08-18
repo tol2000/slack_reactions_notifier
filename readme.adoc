@@ -2,6 +2,10 @@
 
 A simple Slack bot that notifies you when someone adds a reaction to your message.
 
+This application uses a hybrid architecture:
+it monitors events and reads channels using your personal SLACK_USER_TOKEN (acting with your personal access level),
+but sends direct notifications back to you using the SLACK_BOT_TOKEN to avoid scope restrictions.
+
 == Features
 - Captures `reaction_added` events.
 - Notifies you via DM when someone reacts to your messages.
@@ -22,8 +26,9 @@ So, initially you may copy it from .env.example
 |===
 | Variable | Description | Default
 
-| SLACK_USER_TOKEN | Your Slack User OAuth Token (`xoxp-...`) | Required
 | SLACK_APP_TOKEN | Your Slack App-Level Token (`xapp-...`) | Required
+| SLACK_USER_TOKEN | Your Slack User OAuth Token (`xoxp-...`) | Required
+| SLACK_BOT_TOKEN | Your Slack Bot User OAuth Token (`xoxb-...`) | Required
 | MY_SLACK_ID | Your Slack Member ID (e.g., `U12345678`) | Required
 | LOGGING_LEVEL | Logging level (DEBUG, INFO, WARNING, etc.) | INFO
 | LOGGING_LEVEL_FOR_THIRD_PARTY_LIBS | Logging level for third-party libraries (slack_bolt, etc.) | WARNING
@@ -45,8 +50,9 @@ Example of a startup script (`run_notifier.sh`) using runtime variables:
 #!/bin/bash
 docker run -d \
   --name slack-reactions-notifier \
-  -e SLACK_USER_TOKEN="xoxp-your-user-token" \
   -e SLACK_APP_TOKEN="xapp-your-app-token" \
+  -e SLACK_USER_TOKEN="xoxp-your-user-token" \
+  -e SLACK_BOT_TOKEN="xoxb-your-bot-token" \
   -e MY_SLACK_ID="U12345678" \
   -e LOGGING_LEVEL="INFO" \
   -e LOGGING_LEVEL_FOR_THIRD_PARTY_LIBS="WARNING" \
@@ -78,6 +84,7 @@ This setup grants the containerized application the exact same channel access le
     ** `reactions:read` — to detect emoji reaction events.
     ** `channels:history` — to monitor public channel history.
     ** `groups:history` — to monitor private channel history.
+  * Under *Bot Token Scopes*, add:
     ** `chat:write` — to send direct messages back to you.
 . Go to *Features* -> *Event Subscriptions*
   * toggle *Enable Events* to *ON*.
@@ -95,6 +102,9 @@ This setup grants the containerized application the exact same channel access le
 
 . Go to *Settings* -> *Install App*
   * click *Install to Workspace*, and authorize permissions.
+. Go to *Settings* -> *OAuth & Permissions*.
+  * Copy the generated *Bot User OAuth Token* starting with `xoxb-...`.
+  * Save it as *`SLACK_BOT_TOKEN`* in your *.env* file.
 . Go to *Settings* -> *Basic Information* -> *App Credentials*.
   * Copy your `Client ID` and `Client Secret` (click *Show*).
     You will need them for the interactive login script.
@@ -125,11 +135,11 @@ Copy them into your production `.env` file and close the browser.
   ** In the Slack left sidebar under *Apps*, find `slack-reactions-notifier` and open its direct chat.
      Send any message to verify text input is fully unlocked.
 . **Test the Handler**:
-  ** Run your main notifier script. Post a message inside the bot's direct chat
-     (or a public channel where you invited it via `/invite @slack-reactions-notifier`)
-     and add an emoji reaction.
-     The handler will log the event to the screen and `logs/` directory,
-     then send a notification to your DM.
+  ** Run your main notifier script.
+  ** Post a message inside the bot's direct chat (or a public channel where you invited it).
+  ** Add an emoji reaction.
+  ** The handler will log the event to the screen and `logs/` directory.
+  ** A notification message will arrive from the bot in your personal chat with this bot in the *Apps* section.
 
 === Using Docker
 
