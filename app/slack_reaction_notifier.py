@@ -54,8 +54,17 @@ app_logger = logging.getLogger("SlackNotifier.main")
 app = App(token=settings.SLACK_USER_TOKEN)
 
 
+def say_as_user(client, channel: str, text: str):
+    """Send a message into a Slack channel from the perspective of the authorized user."""
+    client.chat_postMessage(
+        channel=channel,
+        text=text,
+        as_user=True  # Force Slack to send it as the personal user account
+    )
+
+
 @app.event("reaction_added")
-def handle_reaction_events(event, say):
+def handle_reaction_events(event, client):
     """Handle reaction_added events from Slack."""
     app_logger.debug(f"Reaction event captured: {event}")
 
@@ -66,18 +75,20 @@ def handle_reaction_events(event, say):
     # Debugging/Testing: Self-reaction
     if user_who_reacted == item_user:
         app_logger.debug("Self-reaction detected. Sending debug notification...")
-        say(
-            text=f"🧪 Debug test: you added a :{emoji_name}: reaction to your own message!",
-            channel=user_who_reacted
+        say_as_user(
+            client=client,
+            channel=user_who_reacted,
+            text=f"🧪 Debug test: you added a :{emoji_name}: reaction to your own message!"
         )
         return
 
     # Notification for the target user (configured via settings)
     if item_user == settings.MY_SLACK_ID:
         app_logger.debug(f"User {user_who_reacted} reacted to your message. Sending notification...")
-        say(
-            text=f"🔔 User <@{user_who_reacted}> added a :{emoji_name}: reaction to your message!",
-            channel=settings.MY_SLACK_ID
+        say_as_user(
+            client=client,
+            channel=settings.MY_SLACK_ID,
+            text=f"🔔 User <@{user_who_reacted}> added a :{emoji_name}: reaction to your message!"
         )
 
 
