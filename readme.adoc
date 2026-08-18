@@ -78,7 +78,6 @@ This setup grants the containerized application the exact same channel access le
     ** `reactions:read` — to detect emoji reaction events.
     ** `channels:history` — to monitor public channel history.
     ** `groups:history` — to monitor private channel history.
-  * Under *Bot Token Scopes*, add:
     ** `chat:write` — to send direct messages back to you.
 . Go to *Features* -> *Event Subscriptions*
   * toggle *Enable Events* to *ON*.
