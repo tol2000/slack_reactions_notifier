@@ -82,30 +82,28 @@ def handle_reaction_events(event):
     channel_id = item.get("channel")
     message_ts = item.get("ts")
 
-    # Filter by item_user if configured
-    if settings.NOTIFY_REACT_ONLY_ON_MY_MESSAGES and item_user != settings.MY_SLACK_ID:
-        app_logger.debug(f"Reaction to someone else's message ({item_user}) skipped.")
-        return
+    if item_user == settings.MY_SLACK_ID or not settings.NOTIFY_REACT_ONLY_ON_MY_MESSAGES:
+        # Fetch permalink for the message
+        permalink = UNKNOWN_LINK_STR
+        if channel_id and message_ts:
+            try:
+                response = app.client.chat_getPermalink(channel=channel_id, message_ts=message_ts)
+                if response.get("ok"):
+                    permalink = response.get("permalink", UNKNOWN_LINK_STR)
+            except Exception as e:
+                app_logger.warning(f"Could not fetch permalink: {e}")
 
-    # Fetch permalink for the message
-    permalink = UNKNOWN_LINK_STR
-    if channel_id and message_ts:
-        try:
-            response = app.client.chat_getPermalink(channel=channel_id, message_ts=message_ts)
-            if response.get("ok"):
-                permalink = response.get("permalink", UNKNOWN_LINK_STR)
-        except Exception as e:
-            app_logger.warning(f"Could not fetch permalink: {e}")
-
-    # Generic notification for all captured reactions
-    app_logger.debug(f"Reaction by {user_who_reacted} detected. Sending notification...")
-    send_bot_notification(
-        channel=settings.MY_SLACK_ID,
-        text=(
-            f"📢 User <@{user_who_reacted}> added a :{emoji_name}: reaction to a message "
-            f"🔗 {permalink}"
+        # Generic notification for all captured reactions
+        app_logger.debug(f"Reaction by {user_who_reacted} detected. Sending notification...")
+        send_bot_notification(
+            channel=settings.MY_SLACK_ID,
+            text=(
+                f"📢 User <@{user_who_reacted}> added a :{emoji_name}: reaction to a message "
+                f"🔗 {permalink}"
+            )
         )
-    )
+    else:
+        app_logger.debug(f"Reaction to someone else's message ({item_user}) skipped.")
 
 
 def main():
