@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     SLACK_USER_TOKEN: str = ""
     SLACK_BOT_TOKEN: str = ""
     MY_SLACK_ID: str = ""
+    NOTIFY_REACT_ONLY_ON_MY_MESSAGES: bool = True
     LOGGING_LEVEL: str = "INFO"
     LOGGING_LEVEL_FOR_THIRD_PARTY_LIBS: str = "WARNING"
 

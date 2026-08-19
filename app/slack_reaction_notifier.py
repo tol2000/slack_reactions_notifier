@@ -77,9 +77,15 @@ def handle_reaction_events(event):
 
     user_who_reacted = event["user"]
     emoji_name = event["reaction"]
+    item_user = event.get("item_user")
     item = event.get("item", {})
     channel_id = item.get("channel")
     message_ts = item.get("ts")
+
+    # Filter by item_user if configured
+    if settings.NOTIFY_REACT_ONLY_ON_MY_MESSAGES and item_user != settings.MY_SLACK_ID:
+        app_logger.debug(f"Reaction to someone else's message ({item_user}) skipped.")
+        return
 
     # Fetch permalink for the message
     permalink = UNKNOWN_LINK_STR

@@ -55,6 +55,7 @@ So, initially you may copy it from .env.example to the same dir.
 | SLACK_USER_TOKEN | Your Slack User OAuth Token (`xoxp-...`) | Required
 | SLACK_BOT_TOKEN | Your Slack Bot User OAuth Token (`xoxb-...`) | Required
 | MY_SLACK_ID | Your Slack Member ID (e.g., `U12345678`) | Required
+| NOTIFY_REACT_ONLY_ON_MY_MESSAGES | If true, notify only about reactions to your messages; otherwise, notify about all reactions | true
 | LOGGING_LEVEL | Logging level (DEBUG, INFO, WARNING, etc.) | INFO
 | LOGGING_LEVEL_FOR_THIRD_PARTY_LIBS | Logging level for third-party libraries (slack_bolt, etc.) | WARNING
 |===
@@ -85,6 +86,7 @@ docker run -d \
   -e SLACK_USER_TOKEN="xoxp-your-user-token" \
   -e SLACK_BOT_TOKEN="xoxb-your-bot-token" \
   -e MY_SLACK_ID="U12345678" \
+  -e NOTIFY_REACT_ONLY_ON_MY_MESSAGES="true" \
   -e LOGGING_LEVEL="INFO" \
   -e LOGGING_LEVEL_FOR_THIRD_PARTY_LIBS="WARNING" \
   slack-reactions-notifier
