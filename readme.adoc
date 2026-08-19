@@ -1,26 +1,51 @@
 = Slack Reactions Notifier
 
+== Description
+
 A simple Slack bot that notifies you when someone adds a reaction to a message in your channels.
 
-This application uses a hybrid architecture:
-it monitors events and reads channels using your personal SLACK_USER_TOKEN (acting with your personal access level),
-but sends direct notifications back to you using the SLACK_BOT_TOKEN to avoid scope restrictions.
+NOTE: This app does *not* work out of the box. +
+      It's intended for IT professionals or IT enthusiasts. +
+      To use it, you need to create your own private application inside your Slack workspace
+      and configure it accordingly.
+      Docker (podman) is also required, as the app runs in a user-container.
+      These are all simple steps, easy for an IT professional,
+      and are described in detail below.
 
-== Features
+=== Features
 
 - Captures `reaction_added` events.
 - Notifies you via DM when emoji reactions are detected in your channels.
-- Configurable logging levels.
-- Pydantic-based configuration.
-- Dockerized setup.
+- .env-based configuration.
+- Dockerized.
+
+=== Architecture
+
+This application uses a hybrid architecture.
+
+* It monitors events and reads channels using your personal SLACK_USER_TOKEN +
+  (acting with your personal access level)
+* But sends direct notifications back to you using the SLACK_BOT_TOKEN +
+  to avoid scope restrictions.
+
+=== Dockerization
+
+The application runs exclusively within a Docker container.
+Nothing is exposed or mapped anywhere.
+
+=== Logging
+
+Logs are created inside the debug container.
+In LOGGING_LEVEL=INFO mode, the log is virtually nonexistent, so the container won't bloat.
+In DEBUG mode, every response is logged.
 
 == Configuration
 
 === Environment variables (.env file)
 
-The application is configured via environment variables or a `.env` file
+The application is configured via environment variables in `.env` file
 located in the project root (parent of the `app/` directory).
-So, initially you may copy it from .env.example
+So, initially you may copy it from .env.example to the same dir.
 
 [cols="1,2,1"]
 |===
@@ -35,13 +60,19 @@ So, initially you may copy it from .env.example
 |===
 
 === Configuration Methods
+
 The application supports two primary configuration methods:
 
-1. **Build-time `.env` file**:
-You can place a `.env` file in the project root before building the Docker image. The `Dockerfile` copies this file into the `/app` directory inside the container. This method is convenient for stable environments.
+==== Build-time `.env` file (recommended)
 
-2. **Runtime Environment Variables**:
-You can build the container with an empty or missing `.env` file and provide all necessary settings at runtime. Environment variables take precedence over values in the `.env` file. This is the recommended way to handle sensitive tokens.
+You can place a `.env` file in the project root before building the Docker image. +
+The `Dockerfile` copies this file into the `/app` directory inside the container. +
+This method is convenient for stable environments.
+
+==== Runtime Environment Variables (optional)
+
+You can build the container with an empty or missing `.env` file
+and provide all necessary settings at runtime. +
 
 Example of a startup script (`run_notifier.sh`) using runtime variables:
 
@@ -63,22 +94,21 @@ docker run -d \
 
 === Slack Setup Guide
 
-This project requires you to create your own private application inside your Slack workspace.
-To protect your corporate credentials and maintain maximum security without a centralized server,
-the script runs entirely under your application and your personal Slack account scopes.
-It is highly recommended to name your application `slack-reactions-notifier` for consistency.
-This setup grants the containerized application the exact same channel access level as you currently have.
+This project requires you to create your own private application
+inside your Slack workspace.
+To protect your corporate credentials and maintain maximum security
+without a centralized server, the script runs entirely under your application
+and your personal Slack account scopes.
+It is recommended to name your application `slack-reactions-notifier` for consistency.
+This setup grants the containerized application the exact same channel access level
+as you currently have.
 
-==== Step 1: Create Your Mirror App & Get `SLACK_APP_TOKEN`
+==== Configure and install your application.
 
-. Go to link:https://api.slack.com/apps[api.slack.com/apps] and click *Create New App* -> *Blank app*.
-. Name it `slack-reactions-notifier` (may be another if you wish) and select your development workspace.
-. In the left menu, go to *Settings* -> *Socket Mode* and toggle *Enable Socket Mode* to *ON*.
-. In the modal, name the token (e.g., `SocketToken`), click *Generate*, and copy the string starting with `xapp-...`.
-  * Save this value as *`SLACK_APP_TOKEN`* in *.env*.
-
-==== Step 2: Configure Scopes & Messages Tab
-
+. Go to link:https://api.slack.com/apps[api.slack.com/apps] link
+  * click *Create an App* -> *Blank app*.
+. Name it `slack-reactions-notifier` (may be another if you wish) and select your workspace.
+. In the left menu, go to *Settings* -> *Socket Mode* and check that *Enable Socket Mode* is *ON*.
 . Go to *Features* -> *OAuth & Permissions*.
   * Under *User Token Scopes*, add:
     ** `reactions:read` — to detect emoji reaction events.
@@ -93,38 +123,26 @@ This setup grants the containerized application the exact same channel access le
     ** click *Save Changes* at the bottom.
 . Go to *Features* -> *App Home*.
   ** Under *Show Tabs*
-     *** turn the *Messages Tab* *ON*
+     *** check that *Messages Tab* is *ON*
      *** check *"Allow users to send Slash commands and messages from the messages tab"*.
 . Go to *Features* -> *OAuth & Permissions* -> *Redirect URLs*.
-  ** Add `http://localhost:51999` and click *Save URL*.
-
-==== Step 3: Install the App
-
+  ** Add `http://localhost:51999` and click *Save URLs*.
 . Go to *Settings* -> *Install App*
-  * click *Install to Workspace*, and authorize permissions.
-. Go to *Settings* -> *OAuth & Permissions*.
+  * click button *Install to [Your Workspace]*, and authorize permissions.
+  * Copy the generated *User OAuth Token* starting with `xoxp-...`.
+    ** Save it as *`SLACK_USER_TOKEN`* in your *.env* file.
   * Copy the generated *Bot User OAuth Token* starting with `xoxb-...`.
-  * Save it as *`SLACK_BOT_TOKEN`* in your *.env* file.
-. Go to *Settings* -> *Basic Information* -> *App Credentials*.
+    ** Save it as *`SLACK_BOT_TOKEN`* in your *.env* file.
+. Run Interactive Authentication
+  * Go to *Settings* -> *Basic Information* -> *App Credentials*.
   * Copy your `Client ID` and `Client Secret` (click *Show*).
     You will need them for the interactive login script.
-
-==== Step 4: Run Interactive Authentication
-
-The interactive `auth.py` script starts a temporary local server, opens your browser,
-and fetches your personal user token and unique user ID (`MY_SLACK_ID`)
-without exposing them to third parties.
-
-[source,bash]
-----
-# Launch the ephemeral auth server via shell script with corresponding parameters in the environment
-SLACK_CLIENT_ID="your_client_id_here" SLACK_CLIENT_SECRET="your_client_secret_here" ./run_auth.sh
-----
-
-Your browser will prompt you to authorize your mirror app. Click *Allow*.
-A local success webpage will display your generated `SLACK_USER_TOKEN` (starts with `xoxp-...`)
-and your `MY_SLACK_ID` (starts with `U...`).
-Copy them into your production `.env` file and close the browser.
+  * Launch the auth script with such command (in one line)
+    ** `SLACK_CLIENT_ID="your_client_id_here" SLACK_CLIENT_SECRET="your_client_secret_here" ./run_auth.sh`
+    ** Your browser will prompt you to authorize your mirror app. Click *Allow*.
+       A local success webpage will display your generated
+       `SLACK_USER_TOKEN` (starts with `xoxp-...`) and your `MY_SLACK_ID` (starts with `U...`).
+    ** Copy them into your production `.env` file and close the browser.
 
 ==== Step 5: Client Refresh & Verification
 
