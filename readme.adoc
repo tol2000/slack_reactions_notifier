@@ -169,7 +169,21 @@ as you currently have.
                 ***** `MY_SLACK_ID` (starts with `U...`).
            **** Copy them into your production `.env` file and close the browser.
 
-==== Step 5: Client Refresh & Verification
+==== Build the container image
+
+[source,bash]
+----
+./docker_build.sh
+----
+
+==== Run the container
+
+[source,bash]
+----
+./docker_run.sh
+----
+
+==== Client Refresh & Verification
 
 . **Fill `MY_SLACK_ID` (if empty) in the `.env`**
   * if you did not fill `MY_SLACK_ID` in the steps above then
@@ -198,39 +212,6 @@ as you currently have.
   * Add an emoji reaction.
   * A notification message will arrive from the bot in your personal chat +
     with this bot in the *Apps* section.
-
-=== Using Docker
-
-==== Build the image
-
-[source,bash]
-----
-./docker_build.sh
-----
-
-==== Run the container
-
-[source,bash]
-----
-./docker_run.sh
-----
-
-=== Local Development
-
-==== Install dependencies
-
-[source,bash]
-----
-pip install -r requirements.txt
-----
-(Note: It is recommended to use `uv` or `pip` with `pyproject.toml`)
-
-==== Run the application
-
-[source,bash]
-----
-python -m app.slack_reaction_notifier
-----
 
 == Project Structure
 - `app/slack_reaction_notifier.py`: Main entry point.
