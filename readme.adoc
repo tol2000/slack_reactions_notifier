@@ -105,10 +105,16 @@ as you currently have.
 
 ==== Configure and install your application.
 
+===== Create your application
+
 . Go to link:https://api.slack.com/apps[api.slack.com/apps] link
   * click *Create an App* -> *Blank app*.
-. Name it `slack-reactions-notifier` (may be another if you wish) and select your workspace.
-. In the left menu, go to *Settings* -> *Socket Mode* and check that *Enable Socket Mode* is *ON*.
+  * Name it `slack-reactions-notifier` (may be another if you wish) and select your workspace.
+
+===== Configure your application
+
+. Go to *Settings* -> *Socket Mode*
+  * Check that *Enable Socket Mode* is *ON*.
 . Go to *Features* -> *OAuth & Permissions*.
   * Under *User Token Scopes*, add:
     ** `reactions:read` — to detect emoji reaction events.
@@ -126,38 +132,69 @@ as you currently have.
      *** check that *Messages Tab* is *ON*
      *** check *"Allow users to send Slash commands and messages from the messages tab"*.
 . Go to *Features* -> *OAuth & Permissions* -> *Redirect URLs*.
-  ** Add `http://localhost:51999` and click *Save URLs*.
+  * Add `http://localhost:51999` and click *Save URLs*.
 . Go to *Settings* -> *Install App*
   * click button *Install to [Your Workspace]*, and authorize permissions.
-  * Copy the generated *User OAuth Token* starting with `xoxp-...`.
-    ** Save it as *`SLACK_USER_TOKEN`* in your *.env* file.
-  * Copy the generated *Bot User OAuth Token* starting with `xoxb-...`.
-    ** Save it as *`SLACK_BOT_TOKEN`* in your *.env* file.
-. Run Interactive Authentication
-  * Go to *Settings* -> *Basic Information* -> *App Credentials*.
-  * Copy your `Client ID` and `Client Secret` (click *Show*).
-    You will need them for the interactive login script.
-  * Launch the auth script with such command (in one line)
-    ** `SLACK_CLIENT_ID="your_client_id_here" SLACK_CLIENT_SECRET="your_client_secret_here" ./run_auth.sh`
-    ** Your browser will prompt you to authorize your mirror app. Click *Allow*.
-       A local success webpage will display your generated
-       `SLACK_USER_TOKEN` (starts with `xoxp-...`) and your `MY_SLACK_ID` (starts with `U...`).
-    ** Copy them into your production `.env` file and close the browser.
+    ** You will see the window with some app properties
+       *** if *User OAuth Token* (starting with `xoxp-...`) displayed then
+           **** Copy the generated *User OAuth Token* starting with `xoxp-...`.
+           **** Save it as `SLACK_USER_TOKEN` in your *.env* file.
+       *** Copy the generated *Bot User OAuth Token* starting with `xoxb-...`.
+       *** Save it as `SLACK_BOT_TOKEN` in your *.env* file.
+. Go to *Settings* -> *Basic Information*
+  * Scroll to *App-Level Tokens*
+    ** Click on the "Generate Token and Scopes"
+       *** In displayed modal window
+          **** Enter token name (e.g., token-for-slack-reactions-notifier)
+          **** Click Add Scope
+               ***** Find and select `connections:write` scope
+          **** Click Generate
+          **** In displayed modal window
+               ***** Copy the token contents
+               ***** Paste it into the `SLACK_APP_TOKEN` in your *.env* file.
+               ***** Click *Done* to close the modal window.
+. Run Interactive Authentication (only if `SLACK_USER_TOKEN` is empty)
+  * if you did not fill `SLACK_USER_TOKEN` in the steps above then
+    ** Go to *Settings* -> *Basic Information* -> *App Credentials*.
+    ** Copy your `Client ID` and `Client Secret` (click *Show*). +
+       You will need them for the interactive login script.
+    ** Launch the auth script with such command (in one line)
+       *** `SLACK_CLIENT_ID="your_client_id_here" SLACK_CLIENT_SECRET="your_client_secret_here" ./run_auth.sh`
+       *** Your browser will prompt you to authorize your mirror app. +
+           **** Click *Allow*. +
+           **** A local success webpage will display your generated +
+                ***** `SLACK_USER_TOKEN` (starts with `xoxp-...`)
+                ***** `MY_SLACK_ID` (starts with `U...`).
+           **** Copy them into your production `.env` file and close the browser.
 
 ==== Step 5: Client Refresh & Verification
 
+. **Fill `MY_SLACK_ID` (if empty) in the `.env`**
+  * if you did not fill `MY_SLACK_ID` in the steps above then
+    ** Click on your avatar in the corner of the slack app window +
+       (usually bottom left or top right, depending on the version of the interface).
+    ** Select Profile from the drop-down menu.
+    ** In the profile panel that opens, click on the button with three dots (...) (More).
+    ** In the menu that appears, click Copy member ID.
+    ** Paste this ID in `MY_SLACK_ID` variable of the `.env`
 . **Force Refresh Slack Client**:
-  ** Open your desktop Slack application and press `Ctrl + R` (Windows) or `Cmd + R` (Mac)
-     to unblock the app's messaging interface.
+  * Open your desktop Slack application and press `Ctrl + R` (Windows) or `Cmd + R` (Mac) +
+    to re-read rights and unblock the app's messaging interface.
 . **Locate the App**:
-  ** In the Slack left sidebar under *Apps*, find `slack-reactions-notifier` and open its direct chat.
-     Send any message to verify text input is fully unlocked.
+  * Open your desktop Slack application
+  * In the Slack left sidebar under *Apps*
+    ** Find app `slack-reactions-notifier`
+       *** if the app is absent then
+           **** Click + Add apps
+           **** Find and add `slack-reactions-notifier`
+    ** Open the app's direct chat.
+    ** Send any message to verify text input is fully unlocked.
 . **Test the Handler**:
-  ** Run your main notifier script.
-  ** Post a message inside the bot's direct chat or any channel you are a member of.
-  ** Add an emoji reaction.
-  ** The handler will log the event to the screen and `logs/` directory.
-  ** A notification message will arrive from the bot in your personal chat with this bot in the *Apps* section.
+  * Run your container with slack reactions notifier script.
+  * Post a message inside the bot's direct chat or any channel you are a member of.
+  * Add an emoji reaction.
+  * A notification message will arrive from the bot in your personal chat +
+    with this bot in the *Apps* section.
 
 === Using Docker
 
