@@ -186,10 +186,11 @@ as you currently have.
   * Open your desktop Slack application
   * In the Slack left sidebar under *Apps*
     ** Find app `slack-reactions-notifier`
-       *** if the app is absent then
+       *** If the app is absent then
            **** Click + Add apps
-           **** Find and add `slack-reactions-notifier`
-    ** Open the app's direct chat.
+           **** Find and select `slack-reactions-notifier`
+           **** Click *Open App* button to open the app's direct chat.
+    ** Open (if not already opened) the app's direct chat.
     ** Send any message to verify text input is fully unlocked.
 . **Test the Handler**:
   * Run your container with slack reactions notifier script.
