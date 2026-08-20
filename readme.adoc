@@ -183,6 +183,20 @@ as you currently have.
 ./docker_run.sh
 ----
 
+==== Autostart after computer reboot
+
+The script tries to "docker start slack-reaction-notifier" and,
+if not successful, executes "docker run..." to create container
+instance and start it.
+
+You may add this bash script to the autostart of your OS or
+add contents of the script to some another autostart-script.
+
+[source,bash]
+----
+./slack_reaction_notifier_autostart.sh
+----
+
 ==== Client Refresh & Verification
 
 . **Fill `MY_SLACK_ID` (if empty) in the `.env`**
