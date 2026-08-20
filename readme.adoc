@@ -80,7 +80,7 @@ This method is convenient for stable environments.
 
 ==== Runtime Environment Variables (optional)
 
-You can build the container with an empty or missing `.env` file
+You can build the container with an empty `.env` file
 and provide all necessary settings at runtime. +
 
 Example of a startup script (`run_notifier.sh`) using runtime variables:
