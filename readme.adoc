@@ -8,7 +8,7 @@ NOTE: This app does *not* work out of the box. +
       It's intended for IT professionals or IT enthusiasts. +
       To use it, you need to create your own private application inside your Slack workspace
       and configure it accordingly.
-      Docker (podman) is also required, as the app runs in a user-container.
+      Docker (podman) is also required, as the app runs in a user's container.
       These are all simple steps, easy for an IT professional,
       and are described in detail below.
 
@@ -30,14 +30,22 @@ This application uses a hybrid architecture.
 
 === Dockerization
 
-The application runs exclusively within a Docker container.
+The application runs exclusively within a docker/podman container.
 Nothing is exposed or mapped anywhere.
 
 === Logging
 
-Logs are created inside the debug container.
-In LOGGING_LEVEL=INFO mode, the log is virtually nonexistent, so the container won't bloat.
-In DEBUG mode, every response is logged.
+Logs are created inside the container.
+
+In `LOGGING_LEVEL=INFO` mode, the log practically does not grow,
+only errors and warnings are logged, your container will not bloat.
+
+In `LOGGING_LEVEL=DEBUG` mode, each reaction is logged.
+If there are a lot of them, the container will grow
+(it’s up to you to decide whether it’s a lot or a little).
+
+`LOGGING_LEVEL_FOR_THIRD_PARTY_LIBS`: It is advisable to leave `WARNING`,
+otherwise third-party libraries will send a lot of their messages.
 
 == Configuration
 
