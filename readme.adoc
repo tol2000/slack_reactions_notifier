@@ -245,6 +245,15 @@ as you currently have.
 [#autostart]
 ==== Autostart after computer reboot
 
+===== Autostart automatically with docker
+
+First, you can use the docker option '--restart un-stopped'. +
+This will solve your autostart problems. +
+But if this option does not work for you (this happens, for example, with podman),
+then use the another variant (with script).
+
+===== Autostart with script running during your OS-session start
+
 The script tries to "docker start slack-reaction-notifier" and,
 if not successful, executes "docker run..." to create container
 instance and start it.
