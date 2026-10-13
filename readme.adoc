@@ -48,6 +48,105 @@ If there are a lot of them, the container will grow
 `LOGGING_LEVEL_FOR_THIRD_PARTY_LIBS`: It is advisable to leave `WARNING`,
 otherwise third-party libraries will send a lot of their messages.
 
+== Configuration
+
+=== Common steps
+
+. Choose hosting for this projects' container +
+  (as described here: <<choose-hosting>>)
+. Clone this project to your local dir
+. Go to the project's root
+. Create .env file from .env.example
+. Create and install your own slack app in your workspace +
+  (as described here: <<conf-inst-app>>) +
+  * During app creation, you will fill the .env file
+    with according values
+. Build your docker/podman container +
+  (as described here: <<build-container>>)
+. Run your docker/podman container +
+  (as described here: <<run-container>>)
+. Open your slack client app (preferably on desktop),
+  add the bot and check how it works +
+  (as described here: <<client-setup>>)
+. Setup autostart +
+  (as described here: <<autostart>>) +
+  reboot your desktop and check if all is working
+
+[#choose-hosting]
+=== Choose hosting for your container
+
+First of all, you'll need a host where you can deploy your container
+with this application (script).
+
+This can be any place where you can deploy a docker container.
+It is preferable that it works continuously.
+
+
+* your personal computer (if, for example, it runs continuously)
+* your home server or NAS
+* a single-board computer like a Raspberry Pi (if it runs continuously)
+* a hosting service where you can set up a Linux or Windows virtual machine (Linux is preferable, as it’s free and has fewer issues with Docker)
+* possibly a specialized container hosting service like Kubernetes (though I haven't tried this myself)
+* basically, anything where you can run this container—ideally 24/7.
+
+WARNING: Of course, you will receive notifications about reactions only when the
+container is running.
+
+Personally, I placed mine on free hosting from Oracle, they give less than a
+gigabyte of RAM, but you don't need much for this container.
+
+[#environment-variables]
+=== Environment variables (.env file)
+
+The application is configured via environment variables in `.env` file
+located in the project root (parent of the `app/` directory).
+So, initially you may copy it from .env.example to the same dir.
+
+[cols="1,2,1"]
+|===
+| Variable | Description | Default
+
+| SLACK_APP_TOKEN | Your Slack App-Level Token (`xapp-...`) | Required
+| SLACK_USER_TOKEN | Your Slack User OAuth Token (`xoxp-...`) | Required
+| SLACK_BOT_TOKEN | Your Slack Bot User OAuth Token (`xoxb-...`) | Required
+| MY_SLACK_ID | Your Slack Member ID (e.g., `U12345678`) | Required
+| NOTIFY_REACT_ONLY_ON_MY_MESSAGES | If true, notify only about reactions to your messages; otherwise, notify about all reactions | true
+| LOGGING_LEVEL | Logging level (DEBUG, INFO, WARNING, etc.) | INFO
+| LOGGING_LEVEL_FOR_THIRD_PARTY_LIBS | Logging level for third-party libraries (slack_bolt, etc.) | WARNING
+|===
+
+=== Configuration Methods
+
+The application supports two primary configuration methods:
+
+==== Build-time `.env` file (recommended)
+
+You can place a `.env` file in the project root before building the Docker image. +
+The `Dockerfile` copies this file into the `/app` directory inside the container. +
+This method is convenient for stable environments.
+
+==== Runtime Environment Variables (optional)
+
+You can build the container with an empty `.env` file
+and provide all necessary settings at runtime. +
+
+Example of a startup script (`run_notifier.sh`) using runtime variables:
+
+[source,bash]
+----
+#!/bin/bash
+docker run -d \
+  --name slack-reactions-notifier \
+  -e SLACK_APP_TOKEN="xapp-your-app-token" \
+  -e SLACK_USER_TOKEN="xoxp-your-user-token" \
+  -e SLACK_BOT_TOKEN="xoxb-your-bot-token" \
+  -e MY_SLACK_ID="U12345678" \
+  -e NOTIFY_REACT_ONLY_ON_MY_MESSAGES="true" \
+  -e LOGGING_LEVEL="INFO" \
+  -e LOGGING_LEVEL_FOR_THIRD_PARTY_LIBS="WARNING" \
+  slack-reactions-notifier
+----
+
 == Installation
 
 === Slack Setup Guide
@@ -196,105 +295,6 @@ add contents of the script to some another autostart-script.
   * Add an emoji reaction.
   * A notification message will arrive from the bot in your personal chat +
     with this bot in the *Apps* section.
-
-== Configuration
-
-=== Common steps
-
-. Choose hosting for this projects' container +
-  (as described here: <<choose-hosting>>)
-. Clone this project to your local dir
-. Go to the project's root
-. Create .env file from .env.example
-. Create and install your own slack app in your workspace +
-  (as described here: <<conf-inst-app>>) +
-  * During app creation, you will fill the .env file
-    with according values
-. Build your docker/podman container +
-  (as described here: <<build-container>>)
-. Run your docker/podman container +
-  (as described here: <<run-container>>)
-. Open your slack client app (preferably on desktop),
-  add the bot and check how it works +
-  (as described here: <<client-setup>>)
-. Setup autostart +
-  (as described here: <<autostart>>) +
-  reboot your desktop and check if all is working
-
-[#choose-hosting]
-=== Choose hosting for your container
-
-First of all, you'll need a host where you can deploy your container
-with this application (script).
-
-This can be any place where you can deploy a docker container.
-It is preferable that it works continuously.
-
-
-* your personal computer (if, for example, it runs continuously)
-* your home server or NAS
-* a single-board computer like a Raspberry Pi (if it runs continuously)
-* a hosting service where you can set up a Linux or Windows virtual machine (Linux is preferable, as it’s free and has fewer issues with Docker)
-* possibly a specialized container hosting service like Kubernetes (though I haven't tried this myself)
-* basically, anything where you can run this container—ideally 24/7.
-
-WARNING: Of course, you will receive notifications about reactions only when the
-container is running.
-
-Personally, I placed mine on free hosting from Oracle, they give less than a
-gigabyte of RAM, but you don't need much for this container.
-
-[#environment-variables]
-=== Environment variables (.env file)
-
-The application is configured via environment variables in `.env` file
-located in the project root (parent of the `app/` directory).
-So, initially you may copy it from .env.example to the same dir.
-
-[cols="1,2,1"]
-|===
-| Variable | Description | Default
-
-| SLACK_APP_TOKEN | Your Slack App-Level Token (`xapp-...`) | Required
-| SLACK_USER_TOKEN | Your Slack User OAuth Token (`xoxp-...`) | Required
-| SLACK_BOT_TOKEN | Your Slack Bot User OAuth Token (`xoxb-...`) | Required
-| MY_SLACK_ID | Your Slack Member ID (e.g., `U12345678`) | Required
-| NOTIFY_REACT_ONLY_ON_MY_MESSAGES | If true, notify only about reactions to your messages; otherwise, notify about all reactions | true
-| LOGGING_LEVEL | Logging level (DEBUG, INFO, WARNING, etc.) | INFO
-| LOGGING_LEVEL_FOR_THIRD_PARTY_LIBS | Logging level for third-party libraries (slack_bolt, etc.) | WARNING
-|===
-
-=== Configuration Methods
-
-The application supports two primary configuration methods:
-
-==== Build-time `.env` file (recommended)
-
-You can place a `.env` file in the project root before building the Docker image. +
-The `Dockerfile` copies this file into the `/app` directory inside the container. +
-This method is convenient for stable environments.
-
-==== Runtime Environment Variables (optional)
-
-You can build the container with an empty `.env` file
-and provide all necessary settings at runtime. +
-
-Example of a startup script (`run_notifier.sh`) using runtime variables:
-
-[source,bash]
-----
-#!/bin/bash
-docker run -d \
-  --name slack-reactions-notifier \
-  -e SLACK_APP_TOKEN="xapp-your-app-token" \
-  -e SLACK_USER_TOKEN="xoxp-your-user-token" \
-  -e SLACK_BOT_TOKEN="xoxb-your-bot-token" \
-  -e MY_SLACK_ID="U12345678" \
-  -e NOTIFY_REACT_ONLY_ON_MY_MESSAGES="true" \
-  -e LOGGING_LEVEL="INFO" \
-  -e LOGGING_LEVEL_FOR_THIRD_PARTY_LIBS="WARNING" \
-  slack-reactions-notifier
-----
 
 == Project Structure
 - `app/slack_reaction_notifier.py`: Main entry point.
