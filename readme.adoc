@@ -2,15 +2,17 @@
 
 == Description
 
-A simple Slack bot that notifies you when someone adds a reaction to a message in your channels.
+A simple Slack bot that notifies you when someone adds a reaction to your message
+in channels you subscribed or in your private conversations.
 
-NOTE: This app does *not* work out of the box. +
-      It's intended for IT professionals or IT enthusiasts. +
-      To use it, you need to create your own private application inside your Slack workspace
-      and configure it accordingly.
-      Docker (podman) is also required, as the app runs in a user's container.
-      These are all simple steps, easy for an IT professional,
-      and are described in detail below.
+This app does *not* work out of the box. +
+It is simple, but designed for IT specialists or IT enthusiasts. +
+
+To use it, you need to create your own private application
+inside your Slack workspace and configure it accordingly. +
+Then you need to build, configure and run docker container
+from this project. +
+That's all!
 
 === Features
 
@@ -49,8 +51,10 @@ otherwise third-party libraries will send a lot of their messages.
 
 == Configuration
 
-=== Quick start
+=== Common steps
 
+. Choose hosting for this projects' container +
+  (as described here: <<choose-hosting>>)
 . Clone this project to your local dir
 . Go to the project's root
 . Create .env file from .env.example
@@ -68,6 +72,29 @@ otherwise third-party libraries will send a lot of their messages.
 . Setup autostart +
   (as described here: <<autostart>>) +
   reboot your desktop and check if all is working
+
+[#choose-hosting]
+=== Choose hosting for your container
+
+First of all, you'll need a host where you can deploy your container
+with this application (script).
+
+This can be any place where you can deploy a docker container.
+It is preferable that it works continuously.
+
+
+* your personal computer (if, for example, it runs continuously)
+* your home server or NAS
+* a single-board computer like a Raspberry Pi (if it runs continuously)
+* a hosting service where you can set up a Linux or Windows virtual machine (Linux is preferable, as it’s free and has fewer issues with Docker)
+* possibly a specialized container hosting service like Kubernetes (though I haven't tried this myself)
+* basically, anything where you can run this container—ideally 24/7.
+
+WARNING: Of course, you will receive notifications about reactions only when the
+container is running.
+
+Personally, I placed mine on free hosting from Oracle, they give less than a
+gigabyte of RAM, but you don't need much for this container.
 
 [#environment-variables]
 === Environment variables (.env file)
@@ -197,7 +224,7 @@ as you currently have.
            **** A local success webpage will display your generated +
                 ***** `SLACK_USER_TOKEN` (starts with `xoxp-...`)
                 ***** `MY_SLACK_ID` (starts with `U...`).
-           **** Copy them into your production `.env` file and close the browser.
+           **** Save them somewhere into your `.env` file and close the browser.
 
 [#build-container]
 ==== Build the container image
