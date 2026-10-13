@@ -3,7 +3,7 @@
 == Description
 
 A simple Slack bot that notifies you when someone adds a reaction to your message
-in channels you subscribed or in your private conversations.
+in channels you are subscribed to or in your private conversations.
 
 This app does *not* work out of the box. +
 It is simple, but designed for IT specialists or IT enthusiasts. +
@@ -12,7 +12,6 @@ To use it, you need to create your own private application
 inside your Slack workspace and configure it accordingly. +
 Then you need to build, configure and run docker container
 from this project. +
-That's all!
 
 === Features
 
@@ -60,14 +59,14 @@ otherwise third-party libraries will send a lot of their messages.
 . Create .env file from .env.example
 . Create and install your own slack app in your workspace +
   (as described here: <<conf-inst-app>>) +
-  * During creation the app you will fill the .env file
+  * During app creation, you will fill the .env file
     with according values
 . Build your docker/podman container +
   (as described here: <<build-container>>)
 . Run your docker/podman container +
   (as described here: <<run-container>>)
 . Open your slack client app (preferably on desktop),
-  add the bot and check how it work +
+  add the bot and check how it works +
   (as described here: <<client-setup>>)
 . Setup autostart +
   (as described here: <<autostart>>) +
@@ -247,10 +246,10 @@ as you currently have.
 
 ===== Autostart automatically with docker
 
-First, you can use the docker option '--restart un-stopped'. +
+First, you can use the docker option '--restart unless-stopped'. +
 This will solve your autostart problems. +
 But if this option does not work for you (this happens, for example, with podman),
-then use the another variant (with script).
+then use another option (using a script).
 
 ===== Autostart with script running during your OS-session start
 
