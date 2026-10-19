@@ -5,8 +5,10 @@
 A simple Slack bot that notifies you when someone adds a reaction to your message
 in channels you are subscribed to or in your private conversations.
 
-This app does *not* work out of the box. +
-It is simple, but designed for IT specialists or IT enthusiasts. +
+This pet project was written for me personally, but I decided to open it,
+in case it will be useful to someone else. +
+The project doesn't work right out of the box.
+It's simple, but it's designed for IT professionals or IT enthusiasts.
 
 To use it, you need to create your own private application
 inside your Slack workspace and configure it accordingly. +
