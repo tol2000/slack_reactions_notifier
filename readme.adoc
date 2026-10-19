@@ -48,39 +48,15 @@ If there are a lot of them, the container will grow
 `LOGGING_LEVEL_FOR_THIRD_PARTY_LIBS`: It is advisable to leave `WARNING`,
 otherwise third-party libraries will send a lot of their messages.
 
-== Configuration
+== Setup and Installation Guide
 
-=== Common steps
-
-. Choose hosting for this projects' container +
-  (as described here: <<choose-hosting>>)
-. Clone this project to your local dir
-. Go to the project's root
-. Create .env file from .env.example
-. Create and install your own slack app in your workspace +
-  (as described here: <<conf-inst-app>>) +
-  * During app creation, you will fill the .env file
-    with according values
-. Build your docker/podman container +
-  (as described here: <<build-container>>)
-. Run your docker/podman container +
-  (as described here: <<run-container>>)
-. Open your slack client app (preferably on desktop),
-  add the bot and check how it works +
-  (as described here: <<client-setup>>)
-. Setup autostart +
-  (as described here: <<autostart>>) +
-  reboot your desktop and check if all is working
-
-[#choose-hosting]
-=== Choose hosting for your container
+=== Step 1: Choose Hosting for Your Container
 
 First of all, you'll need a host where you can deploy your container
 with this application (script).
 
 This can be any place where you can deploy a docker container.
 It is preferable that it works continuously.
-
 
 * your personal computer (if, for example, it runs continuously)
 * your home server or NAS
@@ -95,12 +71,21 @@ container is running.
 Personally, I placed mine on free hosting from Oracle, they give less than a
 gigabyte of RAM, but you don't need much for this container.
 
-[#environment-variables]
-=== Environment variables (.env file)
+=== Step 2: Clone the Repository and Prepare Configuration
 
-The application is configured via environment variables in `.env` file
+Clone this project to your local directory and prepare your configuration:
+
+[source,bash]
+----
+git clone <repository_url>
+cd slack_reactions_notifier
+cp .env.example .env
+----
+
+==== Environment Variables (`.env` file)
+
+The application is configured via environment variables in the `.env` file
 located in the project root (parent of the `app/` directory).
-So, initially you may copy it from .env.example to the same dir.
 
 [cols="1,2,1"]
 |===
@@ -115,17 +100,19 @@ So, initially you may copy it from .env.example to the same dir.
 | LOGGING_LEVEL_FOR_THIRD_PARTY_LIBS | Logging level for third-party libraries (slack_bolt, etc.) | WARNING
 |===
 
-=== Configuration Methods
+You will obtain and fill in the required Slack tokens and ID values during the next step.
+
+==== Configuration Methods
 
 The application supports two primary configuration methods:
 
-==== Build-time `.env` file (recommended)
+===== Build-time `.env` file (recommended)
 
 You can place a `.env` file in the project root before building the Docker image. +
 The `Dockerfile` copies this file into the `/app` directory inside the container. +
 This method is convenient for stable environments.
 
-==== Runtime Environment Variables (optional)
+===== Runtime Environment Variables (optional)
 
 You can build the container with an empty `.env` file
 and provide all necessary settings at runtime. +
@@ -147,9 +134,7 @@ docker run -d \
   slack-reactions-notifier
 ----
 
-== Installation
-
-=== Slack Setup Guide
+=== Step 3: Create and Configure Your Slack Application
 
 This project requires you to create your own private application
 inside your Slack workspace.
@@ -160,143 +145,163 @@ It is recommended to name your application `slack-reactions-notifier` for consis
 This setup grants the containerized application the exact same channel access level
 as you currently have.
 
-[#conf-inst-app]
-==== Configure and install your application.
+==== 1. Create your application
 
-===== Create your application
+. Go to link:https://api.slack.com/apps[api.slack.com/apps]
+. Click *Create an App* -> *Blank app*.
+. Name it `slack-reactions-notifier` (or another name if you wish) and select your workspace.
 
-. Go to link:https://api.slack.com/apps[api.slack.com/apps] link
-  * click *Create an App* -> *Blank app*.
-  * Name it `slack-reactions-notifier` (may be another if you wish) and select your workspace.
+==== 2. Configure Socket Mode
 
-===== Configure your application
+. Go to *Settings* -> *Socket Mode*.
+. Check that *Enable Socket Mode* is *ON*.
 
-. Go to *Settings* -> *Socket Mode*
-  * Check that *Enable Socket Mode* is *ON*.
+==== 3. Configure OAuth & Permissions
+
 . Go to *Features* -> *OAuth & Permissions*.
-  * Under *User Token Scopes*, add:
-    ** `reactions:read` — to detect emoji reaction events.
-    ** `channels:history` — to monitor public channel history.
-    ** `groups:history` — to monitor private channel history.
-  * Under *Bot Token Scopes*, add:
-    ** `chat:write` — to send direct messages back to you.
-. Go to *Features* -> *Event Subscriptions*
-  * toggle *Enable Events* to *ON*.
-  * Under *Subscribe to events on behalf of users*
-    ** add `reaction_added`
-    ** click *Save Changes* at the bottom.
-. Go to *Features* -> *App Home*.
-  ** Under *Show Tabs*
-     *** check that *Messages Tab* is *ON*
-     *** check *"Allow users to send Slash commands and messages from the messages tab"*.
-. Go to *Features* -> *OAuth & Permissions* -> *Redirect URLs*.
+. Under *User Token Scopes*, add:
+  * `reactions:read` — to detect emoji reaction events.
+  * `channels:history` — to monitor public channel history.
+  * `groups:history` — to monitor private channel history.
+. Under *Bot Token Scopes*, add:
+  * `chat:write` — to send direct messages back to you.
+. Under *Redirect URLs*:
   * Add `http://localhost:51999` and click *Save URLs*.
-. Go to *Settings* -> *Install App*
-  * click button *Install to [Your Workspace]*, and authorize permissions.
-    ** You will see the window with some app properties
-       *** if *User OAuth Token* (starting with `xoxp-...`) displayed then
-           **** Copy the generated *User OAuth Token* starting with `xoxp-...`.
-           **** Save it as `SLACK_USER_TOKEN` in your *.env* file.
-       *** Copy the generated *Bot User OAuth Token* starting with `xoxb-...`.
-       *** Save it as `SLACK_BOT_TOKEN` in your *.env* file.
-. Go to *Settings* -> *Basic Information*
-  * Scroll to *App-Level Tokens*
-    ** Click on the "Generate Token and Scopes"
-       *** In displayed modal window
-          **** Enter token name (e.g., token-for-slack-reactions-notifier)
-          **** Click Add Scope
-               ***** Find and select `connections:write` scope
-          **** Click Generate
-          **** In displayed modal window
-               ***** Copy the token contents
-               ***** Paste it into the `SLACK_APP_TOKEN` in your *.env* file.
-               ***** Click *Done* to close the modal window.
-. Run Interactive Authentication (only if `SLACK_USER_TOKEN` is empty)
-  * if you did not fill `SLACK_USER_TOKEN` in the steps above then
-    ** Go to *Settings* -> *Basic Information* -> *App Credentials*.
-    ** Copy your `Client ID` and `Client Secret` (click *Show*). +
-       You will need them for the interactive login script.
-    ** Launch the auth script with such command (in one line)
-       *** `SLACK_CLIENT_ID="your_client_id_here" SLACK_CLIENT_SECRET="your_client_secret_here" ./run_auth.sh`
-       *** Your browser will prompt you to authorize your mirror app. +
-           **** Click *Allow*. +
-           **** A local success webpage will display your generated +
-                ***** `SLACK_USER_TOKEN` (starts with `xoxp-...`)
-                ***** `MY_SLACK_ID` (starts with `U...`).
-           **** Save them somewhere into your `.env` file and close the browser.
 
-[#build-container]
-==== Build the container image
+==== 4. Configure Event Subscriptions
+
+. Go to *Features* -> *Event Subscriptions*.
+. Toggle *Enable Events* to *ON*.
+. Under *Subscribe to events on behalf of users*:
+  * Add `reaction_added`
+  * Click *Save Changes* at the bottom.
+
+==== 5. Configure App Home
+
+. Go to *Features* -> *App Home*.
+. Under *Show Tabs*:
+  * Check that *Messages Tab* is *ON*.
+  * Check *"Allow users to send Slash commands and messages from the messages tab"*.
+
+==== 6. Install App and Collect Tokens
+
+. Go to *Settings* -> *Install App*.
+. Click button *Install to [Your Workspace]*, and authorize permissions.
+. In the displayed window:
+  * If *User OAuth Token* (starting with `xoxp-...`) is displayed:
+    ** Copy the generated *User OAuth Token* starting with `xoxp-...`.
+    ** Save it as `SLACK_USER_TOKEN` in your `.env` file.
+  * Copy the generated *Bot User OAuth Token* starting with `xoxb-...`.
+  * Save it as `SLACK_BOT_TOKEN` in your `.env` file.
+
+==== 7. Generate App-Level Token
+
+. Go to *Settings* -> *Basic Information*.
+. Scroll to *App-Level Tokens*.
+. Click on *Generate Token and Scopes*:
+  * In the modal window, enter a token name (e.g., `token-for-slack-reactions-notifier`).
+  * Click *Add Scope*, find and select `connections:write` scope.
+  * Click *Generate*.
+  * Copy the token contents (starting with `xapp-...`).
+  * Paste it into `SLACK_APP_TOKEN` in your `.env` file.
+  * Click *Done* to close the modal window.
+
+==== 8. Interactive Authentication (Fallback)
+
+Run interactive authentication only if `SLACK_USER_TOKEN` was not available in the steps above:
+
+. Go to *Settings* -> *Basic Information* -> *App Credentials*.
+. Copy your `Client ID` and `Client Secret` (click *Show*). +
+  You will need them for the interactive login script.
+. Launch the auth script with the following command (in one line):
++
+[source,bash]
+----
+SLACK_CLIENT_ID="your_client_id_here" SLACK_CLIENT_SECRET="your_client_secret_here" ./run_auth.sh
+----
+. Your browser will prompt you to authorize your app:
+  * Click *Allow*.
+  * A local success webpage will display your generated:
+    ** `SLACK_USER_TOKEN` (starts with `xoxp-...`)
+    ** `MY_SLACK_ID` (starts with `U...`)
+  * Save them into your `.env` file and close the browser.
+
+==== 9. Obtain Your Slack Member ID (`MY_SLACK_ID`)
+
+If you did not fill `MY_SLACK_ID` in the steps above:
+
+. Open your desktop Slack application.
+. Click on your avatar in the corner of the Slack window (usually bottom-left or top-right, depending on the interface version).
+. Select *Profile* from the drop-down menu.
+. In the profile panel that opens, click on the button with three dots (*...*) (*More*).
+. In the menu that appears, click *Copy member ID*.
+. Paste this ID into the `MY_SLACK_ID` variable in your `.env` file.
+
+=== Step 4: Build the Container Image
+
+Build your container image using the build script:
 
 [source,bash]
 ----
 ./docker_build.sh
 ----
 
-[#run-container]
-==== Run the container
+=== Step 5: Run the Container
+
+Run your container using the run script:
 
 [source,bash]
 ----
 ./docker_run.sh
 ----
 
-[#autostart]
-==== Autostart after computer reboot
+=== Step 6: Slack Client Setup and Verification
 
-===== Autostart automatically with docker
+==== 1. Force Refresh Slack Client
 
-First, you can use the docker option '--restart unless-stopped'. +
-This will solve your autostart problems. +
-But if this option does not work for you (this happens, for example, with podman),
-then use another option (using a script).
+Open your desktop Slack application and press `Ctrl + R` (Windows/Linux) or `Cmd + R` (macOS) to re-read rights and unblock the app's messaging interface.
 
-===== Autostart with script running during your OS-session start
+==== 2. Locate the App
 
-The script tries to "docker start slack-reaction-notifier" and,
-if not successful, executes "docker run..." to create container
-instance and start it.
+. In the Slack left sidebar under *Apps*:
+  * Find the app `slack-reactions-notifier`.
+  * If the app is absent:
+    ** Click *+ Add apps*.
+    ** Find and select `slack-reactions-notifier`.
+    ** Click *Open App* button to open the app's direct chat.
+. Open the app's direct chat.
+. Send any message to verify text input is fully unlocked.
 
-You may add this bash script to the autostart of your OS or
-add contents of the script to some another autostart-script.
+==== 3. Test Reaction Handling
+
+. Ensure your container with the slack reactions notifier script is running.
+. Post a message inside the bot's direct chat or any channel you are a member of.
+. Add an emoji reaction to the message.
+. A notification message will arrive from the bot in your personal chat with this bot in the *Apps* section.
+
+=== Step 7: Configure Autostart (Optional)
+
+To ensure the bot continues running after a system reboot:
+
+==== Method A: Docker restart policy
+
+You can use the docker option `--restart unless-stopped`. +
+This will automatically restart your container after reboots. +
+If this option does not work in your environment (for example, with rootless podman), use Method B.
+
+==== Method B: Autostart script during OS session startup
+
+The included script attempts to run `docker start slack-reaction-notifier`, and if not successful, executes `docker run...` to create and start the container instance.
+
+You can add this script to your operating system's autostart or invoke it from your custom startup scripts:
 
 [source,bash]
 ----
 ./slack_reaction_notifier_autostart.sh
 ----
 
-[#client-setup]
-==== Client Setup, Refresh and Verification
-
-. **Fill `MY_SLACK_ID` (if empty) in the `.env`**
-  * if you did not fill `MY_SLACK_ID` in the steps above then
-    ** Click on your avatar in the corner of the slack app window +
-       (usually bottom left or top right, depending on the version of the interface).
-    ** Select Profile from the drop-down menu.
-    ** In the profile panel that opens, click on the button with three dots (...) (More).
-    ** In the menu that appears, click Copy member ID.
-    ** Paste this ID in `MY_SLACK_ID` variable of the `.env`
-. **Force Refresh Slack Client**:
-  * Open your desktop Slack application and press `Ctrl + R` (Windows) or `Cmd + R` (Mac) +
-    to re-read rights and unblock the app's messaging interface.
-. **Locate the App**:
-  * Open your desktop Slack application
-  * In the Slack left sidebar under *Apps*
-    ** Find app `slack-reactions-notifier`
-       *** If the app is absent then
-           **** Click + Add apps
-           **** Find and select `slack-reactions-notifier`
-           **** Click *Open App* button to open the app's direct chat.
-    ** Open (if not already opened) the app's direct chat.
-    ** Send any message to verify text input is fully unlocked.
-. **Test the Handler**:
-  * Run your container with slack reactions notifier script.
-  * Post a message inside the bot's direct chat or any channel you are a member of.
-  * Add an emoji reaction.
-  * A notification message will arrive from the bot in your personal chat +
-    with this bot in the *Apps* section.
-
 == Project Structure
+
 - `app/slack_reaction_notifier.py`: Main entry point.
 - `app/config.py`: Configuration management.
 - `app/logs/`: Directory for log files.
